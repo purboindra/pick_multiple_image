@@ -12,80 +12,92 @@ class HomeView extends GetView<HomeController> {
         title: Text('HomeView'),
         centerTitle: true,
       ),
-      body: Center(
-        child: Obx(() {
-          if (controller.image.value.path.isEmpty) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Belum ada gambar'),
-                const SizedBox(
-                  height: 30,
-                ),
-                ElevatedButton(
-                    onPressed: () =>
-                        controller.pickImage(imageType: 'firstImage'),
-                    child: Text('pilih gambar'))
-              ],
+      body: Obx(
+        () {
+          if (controller.listImages.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Belum ada gambar'),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  ElevatedButton(
+                      onPressed: () async => await controller.pickImages(),
+                      child: Text('pilih gambar'))
+                ],
+              ),
             );
           }
-          return SizedBox(
-            height: 100,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                Image.file(
-                  controller.image.value,
-                  width: 80,
-                ),
-                const SizedBox(
-                  width: 20,
-                ),
-                if (controller.image2.value.path.isEmpty) ...[
-                  InkWell(
-                    onTap: () => controller.pickImage(imageType: 'secondImage'),
-                    child: Container(
-                      width: 80,
-                      color: Colors.grey,
-                      child: Center(
-                        child: Icon(
-                          Icons.image,
+          return Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: ScrollPhysics(),
+                          scrollDirection: Axis.horizontal,
+                          itemCount: controller.listImages.length,
+                          itemBuilder: (context, index) => Container(
+                            margin: EdgeInsets.symmetric(horizontal: 8),
+                            height: 100,
+                            child: Stack(
+                              children: [
+                                Image.file(
+                                  controller.listImages[index],
+                                ),
+                                Positioned(
+                                  top: 5,
+                                  right: 10,
+                                  child: InkWell(
+                                    onTap: () => controller.removeImage(index),
+                                    child: Icon(
+                                      Icons.cancel,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ] else ...[
-                  Image.file(
-                    controller.image2.value,
-                    width: 80,
-                  ),
-                ],
-                if (controller.image2.value.path.isNotEmpty &&
-                    controller.image3.value.path.isEmpty) ...[
-                  InkWell(
-                    onTap: () => controller.pickImage(imageType: 'thirdImage'),
-                    child: Container(
-                      width: 80,
-                      color: Colors.grey,
-                      child: Center(
-                        child: Icon(
-                          Icons.image,
-                        ),
+                      SizedBox(
+                        width: 10,
                       ),
-                    ),
+                      if (controller.listImages.length <= 2)
+                        InkWell(
+                          onTap: () async => await controller.pickImages(),
+                          child: Container(
+                            height: 100,
+                            width: 100,
+                            color: Colors.grey,
+                            child: Center(
+                              child: Icon(
+                                Icons.image,
+                                size: 24,
+                                color: Colors.grey.shade200,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
-                ] else ...[
-                  if (controller.image3.value.path.isNotEmpty)
-                    Image.file(
-                      controller.image3.value,
-                      width: 80,
-                    ),
-                  const SizedBox(),
-                ]
-              ],
-            ),
+                ),
+              ),
+              if (controller.listImages.isNotEmpty)
+                Expanded(
+                    child: Text(
+                        'Anda telah memilih ${controller.listImages.length} / 3')),
+            ],
           );
-        }),
+        },
       ),
     );
   }
